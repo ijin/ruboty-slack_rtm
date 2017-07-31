@@ -33,7 +33,9 @@ module Ruboty
       end
 
       def main_loop
+        Ruboty.logger.debug("#{Client.name}: Keeping connection with ping")
         keep_connection
+        Ruboty.logger.debug("#{Client.name}: Kept connection with ping!")
 
         loop do
           message = @queue.deq
