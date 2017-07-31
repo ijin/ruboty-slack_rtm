@@ -18,19 +18,17 @@ module Ruboty
       end
 
       def on_text(&block)
-        @client.with do |client|
-          client.on(:message) do |message|
-            case message.type
-            when :ping
-              Ruboty.logger.debug("#{Client.name}: Received ping message")
-              send('', type: 'pong')
-            when :pong
-              Ruboty.logger.debug("#{Client.name}: Received pong message")
-            when :text
-              block.call(JSON.parse(message.data))
-            else
-              Ruboty.logger.warn("#{Client.name}: Received unknown message type=#{message.type}: #{message.data}")
-            end
+        @client.on(:message) do |message|
+          case message.type
+          when :ping
+            Ruboty.logger.debug("#{Client.name}: Received ping message")
+            send('', type: 'pong')
+          when :pong
+            Ruboty.logger.debug("#{Client.name}: Received pong message")
+          when :text
+            block.call(JSON.parse(message.data))
+          else
+            Ruboty.logger.warn("#{Client.name}: Received unknown message type=#{message.type}: #{message.data}")
           end
         end
       end
@@ -67,7 +65,7 @@ module Ruboty
             if message.equal?(CONNECTION_CLOSED)
               break
             end
-            @client.with { |client| client.send(message) }
+            @client.send(message)
           end
         end
       end
@@ -76,7 +74,7 @@ module Ruboty
         Thread.start do
           loop do
             sleep(30)
-            @client.with { |client| client.send('', type: 'ping') }
+            @client.send('', type: 'ping')
           end
         end
       end
