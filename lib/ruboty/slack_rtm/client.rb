@@ -9,7 +9,7 @@ module Ruboty
 
       def initialize(websocket_url:)
         @queue = Queue.new
-        @client = ConnectionPool::Wrapper.new() { create_client(websocket_url.to_s) }
+        @client = ConnectionPool.new() { create_client(websocket_url.to_s) }
       end
 
       def send_message(data)
@@ -18,17 +18,19 @@ module Ruboty
       end
 
       def on_text(&block)
-        @client.on(:message) do |message|
-          case message.type
-          when :ping
-            Ruboty.logger.debug("#{Client.name}: Received ping message")
-            send('', type: 'pong')
-          when :pong
-            Ruboty.logger.debug("#{Client.name}: Received pong message")
-          when :text
-            block.call(JSON.parse(message.data))
-          else
-            Ruboty.logger.warn("#{Client.name}: Received unknown message type=#{message.type}: #{message.data}")
+        @client.with do |client|
+          client.on(:message) do |message|
+            case message.type
+            when :ping
+              Ruboty.logger.debug("#{Client.name}: Received ping message")
+              send('', type: 'pong')
+            when :pong
+              Ruboty.logger.debug("#{Client.name}: Received pong message")
+            when :text
+              block.call(JSON.parse(message.data))
+            else
+              Ruboty.logger.warn("#{Client.name}: Received unknown message type=#{message.type}: #{message.data}")
+            end
           end
         end
       end
@@ -65,7 +67,7 @@ module Ruboty
             if message.equal?(CONNECTION_CLOSED)
               break
             end
-            @client.send(message)
+            @client.with { |client| client.send(message) }
           end
         end
       end
@@ -74,7 +76,7 @@ module Ruboty
         Thread.start do
           loop do
             sleep(30)
-            @client.send('', type: 'ping')
+            @client.with { |client| client.send('', type: 'ping') }
           end
         end
       end
