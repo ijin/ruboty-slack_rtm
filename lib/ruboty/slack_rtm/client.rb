@@ -1,5 +1,6 @@
 require 'json'
 require 'websocket-client-simple'
+require 'connection_pool'
 
 module Ruboty
   module SlackRTM
@@ -8,7 +9,7 @@ module Ruboty
 
       def initialize(websocket_url:)
         @queue = Queue.new
-        @client = create_client(websocket_url.to_s)
+        @client = ConnectionPool.wrap { create_client(websocket_url.to_s) }
       end
 
       def send_message(data)
@@ -33,16 +34,10 @@ module Ruboty
       end
 
       def main_loop
-        keep_connection
-
-        loop do
-          message = @queue.deq
-          Ruboty.logger.debug("Sending message : #{message}, size: #{message.size}")
-          if message.equal?(CONNECTION_CLOSED)
-            break
-          end
-          @client.send(message)
-        end
+        t1 = keep_connection
+        t2 = process_message
+        t1.join
+        t2.join
       end
 
       private
@@ -58,6 +53,19 @@ module Ruboty
             # XXX: This block is called via BasicObject#instance_exec from
             # EventEmitter, so `@queue` isn't visible here.
             queue.enq(CONNECTION_CLOSED)
+          end
+        end
+      end
+
+      def process_message
+        Thread.start do
+          loop do
+            message = @queue.deq
+            Ruboty.logger.debug("Sending message : #{message}, size: #{message.size}")
+            if message.equal?(CONNECTION_CLOSED)
+              break
+            end
+            @client.send(message)
           end
         end
       end
