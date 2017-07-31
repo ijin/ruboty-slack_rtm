@@ -25,6 +25,7 @@ module Ruboty
           when :pong
             Ruboty.logger.debug("#{Client.name}: Received pong message")
           when :text
+            Ruboty.logger.debug("Received text: #{text}")
             block.call(JSON.parse(message.data))
           else
             Ruboty.logger.warn("#{Client.name}: Received unknown message type=#{message.type}: #{message.data}")
