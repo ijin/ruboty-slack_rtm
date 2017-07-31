@@ -39,7 +39,7 @@ module Ruboty
 
         loop do
           message = @queue.deq
-          Ruboty.logger.debug("Message in main_loop: #{message}, size: #{message.size}")
+          Ruboty.logger.debug("Sending message : #{message}, size: #{message.size}")
           if message.equal?(CONNECTION_CLOSED)
             break
           end
