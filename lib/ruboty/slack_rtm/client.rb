@@ -25,7 +25,6 @@ module Ruboty
           when :pong
             Ruboty.logger.debug("#{Client.name}: Received pong message")
           when :text
-            Ruboty.logger.debug("Received text: #{message.data}")
             block.call(JSON.parse(message.data))
           else
             Ruboty.logger.warn("#{Client.name}: Received unknown message type=#{message.type}: #{message.data}")
@@ -34,9 +33,7 @@ module Ruboty
       end
 
       def main_loop
-        Ruboty.logger.debug("#{Client.name}: Keeping connection with ping")
         keep_connection
-        Ruboty.logger.debug("#{Client.name}: Kept connection with ping!")
 
         loop do
           message = @queue.deq
