@@ -13,3 +13,22 @@
 *.a
 mkmf.log
 .env
+
+### https://raw.github.com/github/gitignore/8edb8a95c4c4b3dce71a378aaaf89275510b9cef/Global/Vim.gitignore
+
+# Swap
+[._]*.s[a-v][a-z]
+[._]*.sw[a-p]
+[._]s[a-v][a-z]
+[._]sw[a-p]
+
+# Session
+Session.vim
+
+# Temporary
+.netrwhist
+*~
+# Auto-generated tag files
+tags
+
+
