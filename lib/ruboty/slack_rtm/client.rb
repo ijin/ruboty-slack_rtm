@@ -9,7 +9,7 @@ module Ruboty
 
       def initialize(websocket_url:)
         @queue = Queue.new
-        @client = ConnectionPool.new() { create_client(websocket_url.to_s) }
+        @client = create_client(websocket_url.to_s) 
       end
 
       def send_message(data)
